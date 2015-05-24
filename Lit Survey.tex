@@ -1,0 +1,248 @@
+\documentclass[10pt, openany]{report}
+
+\usepackage{color}
+\usepackage{geometry}
+\geometry{letterpaper}
+%
+% Packages for math typesetting
+%
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+%
+% Other packages
+%
+\usepackage{url}
+\usepackage{pgf}
+%
+% Rules to allow import of graphics files in PDF format
+%
+\usepackage{pstricks}
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf}
+\DeclareGraphicsRule{.pdf}{pdf}{.pdf}{}
+%
+% Rules to add a "DRAFT" watermark to the output.
+%
+\usepackage{graphicx}
+\usepackage{type1cm}
+\usepackage{eso-pic}
+\makeatletter
+\newcommand{\watermark}[1]{
+\AddToShipoutPicture{%
+            \setlength{\@tempdimb}{.5\paperwidth}%
+            \setlength{\@tempdimc}{.5\paperheight}%
+            \setlength{\unitlength}{1pt}%
+            \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
+        \makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}%
+        {\fontsize{6cm}{6cm}\selectfont{#1}}}}%
+            }%
+}}
+\makeatother
+%\watermark{Draft}
+
+\newcommand{\trace}{\emph{Trace Matrix}}
+
+\title{Literature Survey of\\Requirements Traceability}
+\author{Brent Seidel\\IEE 598}
+\date{December 10, 2010}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\listoffigures
+\addcontentsline{toc}{chapter}{List of Figures}
+%\listoftables
+%\addcontentsline{toc}{chapter}{List of Tables}
+
+%========================================================
+\chapter{Introduction}
+``Requirements traceability is defined as the ability to describe and follow the life of a requirement in both directions, towards its origin or towards its implementation, passing through all the related specifications.''\cite{req7}
+
+Refer to Figure~\ref{fig:ReqLevels} and consider, for example, designing a new commercial airplane.  To be most useful to customers, the airplane needs to be able to use short runways (DCO).  After the minimum runway length is specified, the FAA requirements for the ``Accelerate-Stop'' distance, defined in 14 CFR 25.109, are used to figure out how quickly the airplane needs to be able to stop (Regulation, Physical Limitations).  This, then is a new requirement that flows down to the landing gear to specify how strong it needs to be and to the brakes and tires.  Being able to trace between these requirements enables one to determine the impact of one requirement changing.  For example, if it was determined that no tires were available that met the original requirements, the tire requirement might be changed.  Then the traceability would be used to determine which other requirements were also impacted and they could be evaluated.
+
+Depending on the size of the program, the model in Figure~\ref{fig:ReqLevels} may be modified.  Small projects may have only one layer of requirements.  Large projects may have more.  The model may be split over jurisdictional boundaries.  For example, a prime contractor may have responsibility for the first layer of requirements, but use sub-contractors to further develop the lower level requirements and the implementation.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{pgfpicture}{0cm}{2.5cm}{10cm}{10cm}
+    \pgfnodebox{phys}[stroke]{\pgfxy(2.5, 9.5)}{Physical Limitations}{2pt}{2pt}
+    \pgfnodebox{dco}[stroke]{\pgfxy(5.0, 9.5)}{DCOs}{2pt}{2pt}
+    \pgfnodebox{reg}[stroke]{\pgfxy(7.5, 9.5)}{Regulations}{2pt}{2pt}
+    \pgfnodebox{top}[stroke]{\pgfxy(5.0, 7.5)}{Top Level Requirements}{2pt}{2pt}
+    \pgfnodebox{mid}[stroke]{\pgfxy(5.0, 6.0)}{Mid Level Requirements}{2pt}{2pt}
+    \pgfnodebox{low}[stroke]{\pgfxy(5.0, 4.5)}{Low Level Requirements}{2pt}{2pt}
+    \pgfnodebox{test}[stroke]{\pgfxy(2.5, 3.0)}{Tests}{2pt}{2pt}
+    \pgfnodebox{impl}[stroke]{\pgfxy(7.5, 3.0)}{Implementations}{2pt}{2pt}
+%
+    \pgfsetstartarrow{\pgfarrowto}
+    \pgfsetendarrow{\pgfarrowto}
+    \pgfnodeconnline{phys}{top}
+    \pgfnodeconnline{dco}{top}
+    \pgfnodeconnline{reg}{top}
+    \pgfnodeconnline{top}{mid}
+    \pgfnodeconnline{mid}{low}
+    \pgfnodeconnline{low}{test}
+    \pgfnodeconnline{low}{impl}
+%
+    \pgfclearstartarrow
+    \pgfclearendarrow
+    \pgfsetdash{{0.1cm}{0.1cm}}{0cm}
+    \pgfmoveto{\pgfxy(2.0, 8.5)}
+    \pgflineto{\pgfxy(8.0, 8.5)}
+    \pgfstroke
+    \pgfputat{\pgfxy(2.2, 8.6)}{\pgfbox[left, bottom]{Pre-Trace}}
+    \pgfputat{\pgfxy(7.8, 8.2)}{\pgfbox[right, top]{Post-Trace}}
+%
+  \end{pgfpicture}
+  \caption{Levels of Traceability}
+  \label{fig:ReqLevels}
+\end{figure}
+
+In some cases, having requirements traceability is viewed as a measure of system quality and may be mandated by the governing standards\cite{req3}.  Unfortunately, the implementation of traceability is often haphazard\cite{req2}.  The problem is, in my experience, that while most people see traceability as a valuable thing, nobody wants to do it themselves.
+
+\cite{req5}  and \cite{req1} describe two types of traceability identified as ``pre-traceability'' and ``post-traceability''.  Post-traceability is what is typically though of as requirements traceability and enables tracing from the requirements to the design and implementation.  Pre-traceability is used to trace the requirements to their origins.  Referring back to Figure~\ref{fig:ReqLevels}, ``pre-traceability'' is what is above the dotted line, and primarily the DCOs.  ``Post-traceability'' is what is below the dotted line.
+
+\cite{req3} and \cite{req2} divide organizations into ``low-end'' and ``high-end'' users of requirements traceability.  The low-end users are typically new to traceability and view it simply as something that has been levied on them from outside.  In contrast, the high-end users are experienced with traceability and are extracting benefits from it.  There should probably be an additional category on non-users of traceability.
+
+In order to improve the quality of traceability, some tools have been developed to attempt to automate the process \cite{req6}.  These include PRO-ART, described in \cite{req5} for tracking ``pre-traceability'', automatic trace analyzers described in \cite{req4} and \cite{req6} which seek to analyze the requirements and automatically generate the trace information, and \cite{req8}, a commercial requirements management product which includes traceability information.
+%========================================================
+\chapter{Taxonomy}
+
+The taxonomy of requirements traceability is shown in Figure~\ref{fig:Taxonomy}.
+\begin{figure}[!ht]
+  \centering
+  \begin{pgfpicture}{0cm}{-2.5cm}{9cm}{2.5cm}
+    \pgfxyline(0, 0)(7,0)
+    \pgfputlabelrotated{0.02}{\pgfxy(0, 0)}{\pgfxy(7, 0)}{5pt}{\pgfbox[left, bottom]{Requirements Traceability}}
+    \pgfxyline(1, 0)(3, -2)
+    \pgfputlabelrotated{0.2}{\pgfxy(1, 0)}{\pgfxy(3, -2)}{5pt}{\pgfbox[left, bottom]{Derived Requirements}}
+    \pgfxyline(2, 0)(4, -2)
+    \pgfputlabelrotated{0.2}{\pgfxy(2, 0)}{\pgfxy(4, -2)}{5pt}{\pgfbox[left, bottom]{Trace Matrix}}
+    \pgfxyline(3, 0)(5, -2)
+    \pgfputlabelrotated{0.2}{\pgfxy(3, 0)}{\pgfxy(5, -2)}{5pt}{\pgfbox[left, bottom]{Tools}}
+
+    \pgfxyline(4, 0)(6, -2)
+    \pgfxyline(6, -2)(8, -2)
+    \pgfxyline(5.5, -1.5)(8, -1.5)
+    \pgfxyline(5, -1)(8, -1)
+    \pgfputlabelrotated{0.2}{\pgfxy(4, 0)}{\pgfxy(6, -2)}{5pt}{\pgfbox[left, bottom]{Users}}
+    \pgfputlabelrotated{0.2}{\pgfxy(5, -1)}{\pgfxy(8, -1)}{5pt}{\pgfbox[left, bottom]{High-Level}}
+    \pgfputlabelrotated{0.2}{\pgfxy(5.5, -1.5)}{\pgfxy(8, -1.5)}{5pt}{\pgfbox[left, bottom]{Low-Level}}
+    \pgfputlabelrotated{0.2}{\pgfxy(6, -2)}{\pgfxy(8, -2)}{5pt}{\pgfbox[left, bottom]{Non Usersl}}
+
+    \pgfxyline(4.5, 0)(5.5, 1)
+    \pgfxyline(5.5, 1)(8, 1)
+    \pgfxyline(5, 0.5)(8, 0.5)
+    \pgfputlabelrotated{0.2}{\pgfxy(4.5, 0)}{\pgfxy(6.5, 2)}{5pt}{\pgfbox[left, bottom]{Traceability}}
+    \pgfputlabelrotated{0.2}{\pgfxy(5.5, 1)}{\pgfxy(8, 1)}{5pt}{\pgfbox[left, bottom]{Pre-Traceability}}
+    \pgfputlabelrotated{0.2}{\pgfxy(5, 0.5)}{\pgfxy(8, 0.5)}{5pt}{\pgfbox[left, bottom]{Post-Traceability}}
+  \end{pgfpicture}
+  \caption{Requirements Traceability Taxonomy}
+  \label{fig:Taxonomy}
+\end{figure}
+
+\section{Requirements Traceability}
+``Requirements traceability is defined as the ability to describe and follow the life of a requirement in both directions, towards its origin or towards its implementation, passing through all the related specifications.''\cite{req7}  This definition can be extended to include the mechanisms of defining and maintaining relationships between artifacts \cite{req4}.
+
+There is broad agreement that having requirements traceability is a good thing \cite{req6} (or most any other reference).  Indeed, \cite{req5} states that it is necessary for building high quality software systems.
+
+\section{Trace Matrix}
+The \trace{}\footnote{Throughout the rest of this paper, I will be using \trace{} to refer to the physical artifact of requirements traceability when the implementation doesn't matter.  It may be implemented in a database maintained by automatic tools or a sheet of paper maintained by hand.
+} is the artifact that contains the linkages between higher and lower level requirements or between requirements and implementation.  The actual implementation is not particularly important.  It may be a relational database, a spreadsheet, or other method.  The deliverable may be a document or other method.  At a minimum, for the low-level traceability users, the trace matrix contains a pointer to the requirement and the implementation.  For the high-level traceability users, the \trace{} will contain additional information.
+
+\section{Pre-Traceability}
+This refers to trace from the requirements to the origin of the requirements \cite{req5}.  Broadly speaking, this would be the DCOs, regulatory requirements, and physical limitations.  The difficulty with this is that this information is usually not neatly documented and structured.  Much of it is informal, such as meeting minutes or interview notes, which makes it difficult to do manually and impossible to do in a fully automated fashion.  PRO-ART, as described in \cite{req5} is an attempt to partially automate this process.
+
+\section{Post-Traceability}
+This refers to trace between the requirements and the design and implementation \cite{req5}.  This is what is commonly though of as requirements traceability.
+
+\section{Low-Level Users}
+The low level users of traceability view the \trace{} as a deliverable mandated by the customer or by standards \cite{req2}.  The \trace{} generated by low level users typically only provides a link from the requirements to the implementation and test.  This level of traceability can be used to generate tests to verify that all of the requirements have been implemented.  This trace includes only the post-traceability described above.  Of the 26 organizations in the study in \cite{req2}, nine of them fall into the low level user group.
+
+\section{High-Level Users}
+The high level users view the traceability process as an opportunity for satisfying the customer and creating knowledge \cite{req2}.  In addition to providing simple trace linkages like the low level users' \trace{}, the high level users add additional information describing the relationship between the items being linked.  Also, the high level users include trace links to the customer's ``Critical Success Factors''.  This is essentially including the pre-traceability as well as post-traceability described earlier.  Of the 26 organizations in the study in \cite{req2}, 17 of them fall into the high level user group.
+
+\section{Non Users}
+\label{sec:Non}
+\cite{req2} and \cite{req3} cover a description of ``High-Level'' and ``Low-Level'' users of traceability.  However, they omit a discussion of non-users of traceability.  Even among users of traceability, ad hoc tools developed for internal use may not use requirements traceability.
+
+\section{Tools}
+\cite{req6} notes that manually constructing and maintaining a \trace{} is costly and often perceived to have costs that outweigh the benefits.  This would lead to the group described in Section~\ref{sec:Non}.
+
+\section{Derived Requirements}
+Derived requirements come from higher level requirements and assumptions.  They are typically created either to add implementation details or to fill in holes in the higher level requirements.  They can be especially problematic for low-level traceability users since their trace matrix contains no information about the origin of these requirements \cite{req2}.
+
+%========================================================
+\chapter{Tools}
+Traceability is difficult and tedious.  Many tools have been developed to help this process.  The tools fall into two categories; academic and commercial.  Some have already been mentioned.  There are several things that a trace tool can help with.  Some are easier to implement than others.
+
+However, tools can only go so far.  Building and maintaining a \trace{} is still largely a manual process\cite{req9}.
+
+\section{Trace Matrix Management}
+At the most basic level, some tool is needed to manage the \trace{} itself.  Without this, there is no traceability.  This can be as simple a sheet of paper with a couple of columns or it can be integrated into a requirements management system.  Often they are implemented with a spreadsheet or relational database.  PRO-ART\cite{req5} is an example of a tool that manages a \trace{}.  In this case, it is focused on pre-traceability.
+
+\section{Simple Structural Correctness}
+This is the easy part.  Once you have a trace matrix and a list of requirements, it is fairly straightforward to compare the two lists.  From this, you can identify a list of requirements that have been missed in the trace matrix and a list of entries in the trace matrix that do not point to valid requirements.
+
+In some cases, if trace tags are embedded in the text along with the requirement, duplicate trace tags may also exist.  Should this happen, then entries in the \trace{} may be ambiguous.
+
+These issues are fairly simple to detect (I've written tools to do this myself).  Depending on the sophistication of a requirements management system, they may even be prevented from happening.
+
+\section{Missing Trace and Incorrect Trace}
+\subsection{Testing Based Approach}
+One approach to determining which requirements trace to which pieces of code is described in \cite{req4} and \cite{req9}.  This approach requires that tests or ``scenarios'' be written to test the various requirements.  The software is then observed to determine which lines of code are executed for each test.
+
+This approach requires that properly traced tests exist.  While it can be useful in tracing between requirements and code, it may be of less value when tracing between levels of requirements.
+
+\subsection{Keyword Matching Probabilistic Approach}
+Another approach, described in \cite{req6}, is to try and identify trace links through matching similar keywords.  This is a probabilistic approach and requires a human to identify the true links out of a set of candidate links.  As a probabilistic approach, there are two possible problems.  One is identifying extra potential trace links.  The other is missing true trace links.  Since a human is already in the loop, the first problem is not serious until the number of extra links gets large.  The second problem is more serious and indicates that all of the requirements need to be searched to find the missing links.  As noted in \cite{req6}, it is best to err on the side of providing to many potential links.
+
+This approach divides potential links into three groups.  The first has a high confidence that they are true links and are presented to the user for evaluation.  The second has low confidence.  The third group has high confidence that these links are not true links and should be rejected.  Some strategies are described to attempt to move links from the second group to either the first or third group.
+
+\subsection{Ontologically Driven Approach}
+This approach, described in \cite{req10}, attempts to construct an ontology of the requirements and the software and then match them.  The ontologies are represented using first-order logic.  The matching returns one of five different relations between the requirements and software.  The first is equivalence which represents a total and complete match.  The second is a more or less general match.  The third is a mismatch which indicates that the particular software does not match the particular requirement.  The fourth is overlapping which indicates an overlap between the requirements and software.  Finally, if the tool cannot determine any other relationship, it returns ``idk'' (I don't know).
+
+\subsection{Evolving the Trace Matrix}
+Once the \trace{} has been created (in some fashion), it needs to be maintained.  A method of maintaining the \trace{} is described in \cite{req11}.  It works by examining changes to the artifacts (requirements, software, etc) and using the current \trace{} to identify potential impacts.
+
+\section{Available Tools}
+The INCOSE website has a page with a list of requirements management tools\footnote{\url{http://www.incose.org/productspubs/products/rmsurvey.aspx}}.  One of these tools, DOORs was arbitrarily picked as representative of commercial tools.  In addition, an open source tool was also reviewed.
+
+\subsection{DOORs}
+DOORs does provide some traceability support\cite{req8}, however it requires manual entry of the trace links.  Once the links are entered, the \trace{} can be followed up and down.  This is adequate for the low-level traceability users\cite{req2}, but not for high-level users.  The additional information would need to be captured separately.
+
+The requirements entered into DOORs can start with the DCOs and be elaborated into lower level requirements.  This will support both pre and post traceability\cite{req5}.
+
+\subsection{Open Source Requirements Management Tools / Nimble}
+There are some good reviews for Open Source Requirements Management Tools (OSRMT)\footnote{\url{http://sourceforge.net/projects/osrmt/}}, but development seems to have stalled.  A new project has started called Nimble\footnote{\url{http://sourceforge.net/projects/nimble/}} which aims to be a replacement for OSRMT.  Nimble is currently under active development, but has not yet made a beta release.  This may be a good project for someone interested in requirements traceability to join.
+
+
+%========================================================
+\chapter{Conclusions}
+\section{The Good}
+Having a complete \trace{} in place enables one to quickly determine the impact of requirements changes and determine if all of the requirements have been implemented and tested.  Conversely, if implementing a requirement proves to be infeasible, one can follow the traceability upwards to determine what other requirements may be impacted.  If pre-traceability has been done, this can even lead up to the DCOs and enable negotiations about how badly the customer wants the feature.
+
+\section{The Bad}
+Traceability is tedious hard work that nobody wants to do. As a result, the implementation is often haphazard\cite{req9} and seen as a cost rather than a benefit.  It is reported\cite{req2} that 4\% of the U.S. Defense Department's IT costs are spent on traceability.
+
+\section{The Ugly}
+While tools do exist that automate some aspects of traceability, there are many challenges and the problem is far from solved\cite{req10}.  Once the \trace{} is created, keeping it maintained is also a difficult problem that is far from solved\cite{req11}.
+
+%========================================================
+\appendix
+\chapter{Searches Used}
+For the introductory material, the Google Scholar search engine was used.  The search term used was ``requirements traceability''.  This produces the URL 
+\url{http://scholar.google.com/scholar?q=requirements+traceability&hl=en&btnG=Search&as_sdt=801&as_sdtp=on}
+
+For additional material about, the ASU library website was used.
+%
+% Setup bibliography
+%
+%========================================================
+\addcontentsline{toc}{chapter}{References}
+\bibliography{Bibleography}
+\bibliographystyle{alpha}
+
+\end{document}
